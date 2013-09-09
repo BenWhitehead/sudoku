@@ -3,6 +3,6 @@ package com.github.benwhitehead.tutorials.sudoku;
 /**
  * @author Ben Whitehead
  */
-public interface Puzzle {
+interface Puzzle {
     boolean isSolved();
 }

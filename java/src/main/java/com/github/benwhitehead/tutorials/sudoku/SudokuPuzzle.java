@@ -1,12 +1,9 @@
 package com.github.benwhitehead.tutorials.sudoku;
 
-import lombok.ToString;
-
 /**
  * @author Ben Whitehead
  */
-@ToString
-public class SudokuPuzzle implements Puzzle {
+final class SudokuPuzzle implements Puzzle {
 
     private CellValue[][] possibleSolution;
 
@@ -133,5 +130,15 @@ public class SudokuPuzzle implements Puzzle {
             }
         }
         return clone;
+    }
+
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (CellValue[] cellValues : possibleSolution) {
+            for (CellValue cellValue : cellValues) {
+                sb.append(cellValue.toString());
+            }
+        }
+        return sb.toString();
     }
 }

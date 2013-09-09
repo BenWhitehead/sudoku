@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * @author Ben Whitehead
  */
-public final class CellValueFactory {
+final class CellValueFactory {
     private CellValueFactory() {
     }
 

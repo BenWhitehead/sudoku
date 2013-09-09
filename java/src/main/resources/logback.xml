@@ -9,6 +9,8 @@
     </appender>
 
     <logger name="com.github.benwhitehead.tutorials.sudoku" level="info"/>
+    <logger name="status-grid" level="error"/>
+    <logger name="status-line" level="info"/>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>

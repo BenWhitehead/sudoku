@@ -3,6 +3,7 @@ package com.github.benwhitehead.tutorials.sudoku;
 /**
  * @author Ben Whitehead
  */
-public interface CellValue {
+interface CellValue {
     boolean isSolved();
+    String toString();
 }

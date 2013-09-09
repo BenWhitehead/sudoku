@@ -1,14 +1,16 @@
 package com.github.benwhitehead.tutorials.sudoku;
 
-import lombok.ToString;
-
 /**
  * @author Ben Whitehead
  */
-@ToString
-public class EmptyCell implements CellValue {
+final class EmptyCell implements CellValue {
     @Override
     public boolean isSolved() {
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return ".";
     }
 }

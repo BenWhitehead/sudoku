@@ -6,8 +6,6 @@ import com.google.common.collect.Sets;
 import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -18,9 +16,10 @@ import java.util.Set;
 @ToString
 public class SudokuSolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(SudokuSolver.class);
+    private static final Logger STATUS_LINE = LoggerFactory.getLogger("status-line");
+    private static final Logger STATUS_GRID = LoggerFactory.getLogger("status-grid");
 
     private final int[][] originalPuzzle;
-
 
     public SudokuSolver(int[][] puzzle) {
         originalPuzzle = puzzle;
@@ -28,7 +27,8 @@ public class SudokuSolver {
 
     public int[][] solve() {
         final SudokuPuzzle sudokuPuzzle = new SudokuPuzzle(originalPuzzle);
-        LOGGER.info("Attempting to Solve provided puzzle:\n" +
+        STATUS_LINE.info("Attempting to Solve provided puzzle: {}", sudokuPuzzle);
+        STATUS_GRID.info("Attempting to Solve provided puzzle:\n" +
                     "{}\n" +
                     "{}\n" +
                     "{}\n" +
@@ -37,13 +37,14 @@ public class SudokuSolver {
                     "{}\n" +
                     "{}\n" +
                     "{}\n" +
-                    "{}", originalPuzzle);
+                    "{}", sudokuPuzzle.getSolution(false));
         final Stopwatch stopwatch = new Stopwatch().start();
 
-        final SudokuPuzzle solvedPuzzle = solvePuzzle(sudokuPuzzle, MarkerFactory.getMarker(String.format("")));
+        final SudokuPuzzle solvedPuzzle = solvePuzzle(sudokuPuzzle);
         stopwatch.stop();
         final int[][] solution = solvedPuzzle.getSolution();
-        LOGGER.info("Solved puzzle in " + stopwatch + ".  Solution is:\n" +
+        STATUS_LINE.info("Solved puzzle in {}. Solution is: {}", stopwatch, solvedPuzzle);
+        STATUS_GRID.info("Solved puzzle in " + stopwatch + ". Solution is:\n" +
                     "{}\n" +
                     "{}\n" +
                     "{}\n" +
@@ -56,8 +57,9 @@ public class SudokuSolver {
         return solution;
     }
 
-    private SudokuPuzzle solvePuzzle(final SudokuPuzzle sudokuPuzzle, final Marker marker) {
-        LOGGER.debug(marker,
+    private SudokuPuzzle solvePuzzle(final SudokuPuzzle sudokuPuzzle) {
+        STATUS_LINE.debug("solvePuzzle(sudokuPuzzle : {})", sudokuPuzzle);
+        STATUS_GRID.debug(
                 "solvePuzzle(sudokuPuzzle : \n" +
                 "               {}\n" +
                 "               {}\n" +
@@ -77,46 +79,47 @@ public class SudokuSolver {
                     final CellValue cellValue = sudokuPuzzle.getCellValue(i, j);
                     if (!cellValue.isSolved()) {
                         final CellValue newValueForCell = getPossibleValueForCell(i, j, sudokuPuzzle);
-                        LOGGER.trace(marker, "Setting cell ({}, {}) value to: {}", new Object[]{i, j, newValueForCell});
+                        LOGGER.trace("Setting cell ({}, {}) value to: {}", i, j, newValueForCell);
                         sudokuPuzzle.setCellValue(i, j, newValueForCell);
                     }
                 }
             }
             final int[][] newProgress = sudokuPuzzle.getSolution(false);
             if (Arrays.deepEquals(progress, newProgress)) {
-                LOGGER.debug(marker, "Unable to make any progress on solving the puzzle, a guess is required.");
-                LOGGER.trace(marker, "guess(sudokuPuzzle : {})", sudokuPuzzle);
+                LOGGER.debug("Unable to make any progress on solving the puzzle, a guess is required.");
+                LOGGER.trace("guess(sudokuPuzzle : {})", sudokuPuzzle);
                 final SudokuPuzzle puzzleForGuess = sudokuPuzzle.cloneKeepingType();
                 GetCellToGuessValueOf cellToGuessValueOf = new GetCellToGuessValueOf(sudokuPuzzle).invoke();
                 int row = cellToGuessValueOf.getRow();
                 int col = cellToGuessValueOf.getCol();
 
                 final CellValue cellValue = sudokuPuzzle.getCellValue(row, col);
-                LOGGER.debug(marker, "Cell to guess value of located at: ({}, {}). Cell is: {} ", new Object[]{row, col, cellValue});
+                LOGGER.debug("Cell to guess value of located at: ({}, {}). Cell is: {} ", row, col, cellValue);
                 if (cellValue instanceof PossibleValue) {
                     final PossibleValue value = (PossibleValue) cellValue;
                     // This is the guess, just loop over the values trying to see if the value will work.
                     final Set<Integer> possibleValues = value.getValues();
                     for (Integer possibleValue : possibleValues) {
                         final SudokuPuzzle puzzleWithGuess = puzzleForGuess.cloneKeepingType();
-                        LOGGER.debug(marker, "Guessing value: {}", possibleValue);
+                        LOGGER.debug("Guessing value: {}", possibleValue);
                         puzzleWithGuess.setCellValue(row, col, new SolvedValue(possibleValue));
-                        final SudokuPuzzle possiblySolvedPuzzleWithGuess = solvePuzzle(puzzleWithGuess, MarkerFactory.getMarker(String.format("<(%d, %d): %d>", row, col, possibleValue)));
+                        final SudokuPuzzle possiblySolvedPuzzleWithGuess = solvePuzzle(puzzleWithGuess);
                         if (possiblySolvedPuzzleWithGuess != null && possiblySolvedPuzzleWithGuess.isSolved()) {
                             return possiblySolvedPuzzleWithGuess;
                         } else {
-                            LOGGER.debug(marker, "Guess value: {} did not yield a solution.", possibleValue);
+                            LOGGER.debug("Guess value: {} did not yield a solution.", possibleValue);
                         }
                     }
                 } else {
                     throw new IllegalStateException("Trying to guess for a cell that isn't a possible value.");
                 }
-                LOGGER.debug(marker, "Unable to find a solution when guessing for cell located at: ({}, {}). Cell is: {} ", new Object[]{row, col, cellValue});
+                LOGGER.debug("Unable to find a solution when guessing for cell located at: ({}, {}). Cell is: {} ", row, col, cellValue);
                 return null;
             } else {
                 progress = newProgress;
             }
-            LOGGER.debug(marker, "Solution Progress:\n" +
+            STATUS_LINE.debug("Solution Progress: {}", sudokuPuzzle);
+            STATUS_GRID.debug("Solution Progress:\n" +
                         "               {}\n" +
                         "               {}\n" +
                         "               {}\n" +

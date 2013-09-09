@@ -1,16 +1,18 @@
 package com.github.benwhitehead.tutorials.sudoku;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
-import lombok.ToString;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
 * @author Ben Whitehead
 */
-@ToString
-class PossibleValue implements CellValue {
+final class PossibleValue implements CellValue {
     private final Set<Integer> values;
 
     PossibleValue(int value, int... moreValues) {
@@ -48,6 +50,20 @@ class PossibleValue implements CellValue {
         if (!(1 <= possibleValue && possibleValue <= 9)) {
             throw new IllegalArgumentException(String.format("Invalid value %d, must be between 1 and 9.", possibleValue));
         }
+    }
+
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        final List<Integer> ints = Lists.newArrayList(values);
+        Collections.sort(ints);
+        for (Iterator<Integer> iterator = ints.iterator(); iterator.hasNext(); ) {
+            final Integer anInt = iterator.next();
+            sb.append(anInt);
+            if (iterator.hasNext()) {
+                sb.append(',');
+            }
+        }
+        return sb.append('}').toString();
     }
 
     public static PossibleValue allValues() {
