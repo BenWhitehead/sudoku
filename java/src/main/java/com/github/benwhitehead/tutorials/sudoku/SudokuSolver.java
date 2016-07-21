@@ -38,7 +38,7 @@ public class SudokuSolver {
                     "{}\n" +
                     "{}\n" +
                     "{}", sudokuPuzzle.getSolution(false));
-        final Stopwatch stopwatch = new Stopwatch().start();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
 
         final SudokuPuzzle solvedPuzzle = solvePuzzle(sudokuPuzzle);
         stopwatch.stop();
